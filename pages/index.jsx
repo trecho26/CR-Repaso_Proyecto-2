@@ -8,23 +8,43 @@ import Head from "next/head";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import Form from "../Components/Form";
 import Tooltip from "@mui/material/Tooltip";
+import { useState, useEffect } from "react";
+import { formatDate, getColorByPriority } from "../helpers";
 
-const tasks = [
-  {
-    id: "465as4d5a64sda",
-    name: "Limpiar la casa",
-    level: 1,
-    date: new Date(),
-  },
-  {
-    id: "465as4d5a64sda",
-    name: "Limpiar la casa 2",
-    level: 1,
-    date: new Date(),
-  },
-];
+// const tasks = [
+//   {
+//     id: "465as4d5a64sda",
+//     name: "Limpiar la casa",
+//     level: 1,
+//     date: new Date(),
+//   },
+//   {
+//     id: "465as4d5a64sda",
+//     name: "Limpiar la casa 2",
+//     level: 1,
+//     date: new Date(),
+//   },
+// ];
 
 export default function Home() {
+  const [tasks, setTasks] = useState([]);
+
+  const handleFinishTask = (id) => {
+    // Crear nuevo arreglo dado el filtro aplicado
+    const filteredTasks = tasks.filter((task) => task.id !== id);
+    // Asignar al state
+    setTasks(filteredTasks);
+  };
+
+  useEffect(() => {
+    const tasksLS = localStorage.getItem("cr-tasks");
+
+    if (tasksLS) {
+      let parsedTasks = JSON.parse(tasksLS);
+      setTasks(parsedTasks);
+    }
+  }, []);
+
   return (
     <>
       <Head>
@@ -41,10 +61,17 @@ export default function Home() {
         <Typography variant="h5" component="h5">
           Agrega una lista de tareas
         </Typography>
-        <Form />
+        {/* FORMULARIO */}
+        <Form addTask={setTasks} />
       </Paper>
+      {tasks.length === 0 && (
+        <Typography variant="h5" component="h5">
+          No tienes tareas
+        </Typography>
+      )}
       {tasks.map((task) => (
         <Paper
+          key={task.id}
           sx={{
             padding: "1rem",
             mb: "1rem",
@@ -54,7 +81,7 @@ export default function Home() {
         >
           <Box
             sx={{
-              bgcolor: "success.light",
+              bgcolor: getColorByPriority(task.priority),
               width: "20px",
               height: "20px",
               borderRadius: "50%",
@@ -76,12 +103,12 @@ export default function Home() {
               component="p"
               color="text.secondary"
             >
-              2022-02-23
+              {formatDate(task.date)}
             </Typography>
           </Box>
           <Box sx={{ display: "flex" }}>
             <Tooltip title="Marcar como terminada">
-              <IconButton>
+              <IconButton onClick={() => handleFinishTask(task.id)}>
                 <DoneAllIcon />
               </IconButton>
             </Tooltip>
