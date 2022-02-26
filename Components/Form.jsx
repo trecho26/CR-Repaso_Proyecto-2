@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -10,13 +10,15 @@ import FormControl from "@mui/material/FormControl";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import short from "short-uuid";
+import AppContext from "../Context/AppContext";
 
 const initialValues = {
   name: "",
   priority: "",
 };
 
-const Form = ({ addTask }) => {
+const Form = () => {
+  const { addTask, selectedProject } = useContext(AppContext);
   const formik = useFormik({
     initialValues: initialValues,
     validationSchema: Yup.object({
@@ -30,12 +32,9 @@ const Form = ({ addTask }) => {
         ...values,
         id,
         date,
+        projectId: selectedProject.id,
       };
-      addTask((prevState) => {
-        let state = [...prevState, newTask];
-        localStorage.setItem("cr-tasks", JSON.stringify(state));
-        return state;
-      });
+      addTask(newTask);
       formik.resetForm();
     },
   });

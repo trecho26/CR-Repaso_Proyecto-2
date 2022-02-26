@@ -12,7 +12,7 @@ import Container from "@mui/material/Container";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
-const drawerWidth = 200;
+const drawerWidth = 250;
 
 const Layout = ({ children, window }) => {
   const { pathname } = useRouter();

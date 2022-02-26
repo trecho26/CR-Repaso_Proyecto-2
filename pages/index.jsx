@@ -8,42 +8,17 @@ import Head from "next/head";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import Form from "../Components/Form";
 import Tooltip from "@mui/material/Tooltip";
-import { useState, useEffect } from "react";
+import { useContext } from "react";
 import { formatDate, getColorByPriority } from "../helpers";
-
-// const tasks = [
-//   {
-//     id: "465as4d5a64sda",
-//     name: "Limpiar la casa",
-//     level: 1,
-//     date: new Date(),
-//   },
-//   {
-//     id: "465as4d5a64sda",
-//     name: "Limpiar la casa 2",
-//     level: 1,
-//     date: new Date(),
-//   },
-// ];
+import AppContext from "../Context/AppContext";
+import Task from "../Components/Task";
 
 export default function Home() {
-  const [tasks, setTasks] = useState([]);
+  const { tasks, selectedProject } = useContext(AppContext);
 
-  const handleFinishTask = (id) => {
-    // Crear nuevo arreglo dado el filtro aplicado
-    const filteredTasks = tasks.filter((task) => task.id !== id);
-    // Asignar al state
-    setTasks(filteredTasks);
-  };
-
-  useEffect(() => {
-    const tasksLS = localStorage.getItem("cr-tasks");
-
-    if (tasksLS) {
-      let parsedTasks = JSON.parse(tasksLS);
-      setTasks(parsedTasks);
-    }
-  }, []);
+  const filteredTasks = tasks.filter(
+    (task) => task.projectId === selectedProject?.id
+  );
 
   return (
     <>
@@ -51,70 +26,35 @@ export default function Home() {
         <title>Todo App - Home</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <Paper
-        sx={{
-          padding: "1rem",
-          margin: "0 auto",
-          mb: "2rem",
-        }}
-      >
-        <Typography variant="h5" component="h5">
-          Agrega una lista de tareas
-        </Typography>
-        {/* FORMULARIO */}
-        <Form addTask={setTasks} />
-      </Paper>
-      {tasks.length === 0 && (
-        <Typography variant="h5" component="h5">
-          No tienes tareas
-        </Typography>
-      )}
-      {tasks.map((task) => (
-        <Paper
-          key={task.id}
-          sx={{
-            padding: "1rem",
-            mb: "1rem",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Box
+      {selectedProject ? (
+        <>
+          <Paper
             sx={{
-              bgcolor: getColorByPriority(task.priority),
-              width: "20px",
-              height: "20px",
-              borderRadius: "50%",
-            }}
-          ></Box>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              flex: "1",
-              margin: "0 1rem",
+              padding: "1rem",
+              margin: "0 auto",
+              mb: "2rem",
             }}
           >
-            <Typography variant="subtitle1" component="p">
-              {task.name}
+            <Typography sx={{ fontSize: "16px" }} variant="h5" component="h5">
+              Agrega una tarea para: {selectedProject.name}
             </Typography>
-            <Typography
-              variant="subtitle2"
-              component="p"
-              color="text.secondary"
-            >
-              {formatDate(task.date)}
+            {/* FORMULARIO */}
+            <Form />
+          </Paper>
+          {filteredTasks.length === 0 && (
+            <Typography variant="h5" component="h5">
+              No tienes tareas
             </Typography>
-          </Box>
-          <Box sx={{ display: "flex" }}>
-            <Tooltip title="Marcar como terminada">
-              <IconButton onClick={() => handleFinishTask(task.id)}>
-                <DoneAllIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </Paper>
-      ))}
+          )}
+          {filteredTasks.map((task) => (
+            <Task key={task.id} task={task} />
+          ))}
+        </>
+      ) : (
+        <Typography variant="h4" component="h5">
+          Selecciona un proyecto
+        </Typography>
+      )}
     </>
   );
 }
